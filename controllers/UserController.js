@@ -1,8 +1,8 @@
-const userSchema = require("../models/UserModels");
+const userSchema = require("../modals/UserModals");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-// 🔹 Get all users
+
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await userSchema.find();
