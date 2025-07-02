@@ -6,37 +6,40 @@ const User = require('../modals/UserModals');
 const sendOtpEmail = require('../utils/sendotp');
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-// Signup with OTP
 router.post('/signup', async (req, res) => {
-  const { name, phone, email, password, role } = req.body;
-  try {
-    const existing = await User.findOne({ $or: [{ phone }, { email }] });
-    if (existing) return res.status(400).json({ error: 'User already exists' });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = generateOtp();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    const newUser = new User({
-      name,
-      phone,
-      email,
-      password: hashedPassword,
-      role,
-      otp,
-      otpExpires
-    });
-
-    await newUser.save();
-    await sendOtpEmail(email, otp);
-
-    res.status(201).json({ message: 'Signup successful, OTP sent to email' });
-  } catch (error) {
-    res.status(500).json({ error: 'Signup failed' });
-  }
-});
-
+    const { name, phone, email, password, role } = req.body;
+  
+    try {
+      const existing = await User.findOne({ $or: [{ phone }, { email }] });
+      if (existing) return res.status(400).json({ success: false, message: 'User already exists' });
+  
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const otp = generateOtp();
+      const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  
+      const newUser = new User({
+        name,
+        phone,
+        email,
+        password: hashedPassword,
+        role: role || 'User',
+        otp,
+        otpExpires
+      });
+  
+      await newUser.save();
+      await sendOtpEmail(email, otp);
+  
+      res.status(201).json({
+        success: true,
+        message: 'Signup successful. OTP sent to email.'
+      });
+    } catch (error) {
+      console.error('Signup failed:', error);
+      res.status(500).json({ success: false, message: 'Signup failed. Try again later.' });
+    }
+  });
+  
 // Verify OTP
 router.post('/verify-otp', async (req, res) => {
   const { email, otp } = req.body;
