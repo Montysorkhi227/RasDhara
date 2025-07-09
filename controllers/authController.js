@@ -11,11 +11,9 @@ exports.sendOtp = async (req, res) => {
 
   try {
     await sendOtpEmail(email, otp);
-    // You can save OTP to DB or cache (optional)
     res.status(200).send({
       success: true,
       message: "OTP sent successfully",
-      otp // remove this in production
     });
   } catch (err) {
     res.status(500).send({

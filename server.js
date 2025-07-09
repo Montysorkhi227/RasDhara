@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-
 const authRoutes = require('./routes/auth');
 
 const app = express();
@@ -16,6 +15,23 @@ mongoose.connect(process.env.MONGO_URL, {
   .catch(err => console.log(err));
 
 app.use('/api/auth', authRoutes);
+
+// 🔐 Protected route example:
+app.post('/api/protected', async (req, res) => {
+  const authHeader = req.headers.authorization || '';
+  const idToken = authHeader.startsWith('Bearer ')
+    ? authHeader.split('Bearer ')[1]
+    : null;
+
+  if (!idToken) return res.status(401).json({ error: 'No token provided' });
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    res.json({ success: true, uid: decoded.uid });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid or expired token' });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
