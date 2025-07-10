@@ -10,7 +10,7 @@ const upload = require('../Middleware/Multer');
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 // 🟢 Signup Route (with profile image upload)
-router.post('/signup', upload.single('profileImage'), async (req, res) => {
+router.post('/signup', upload.single('rasdhara_users'), async (req, res) => {
   const { name, phone, email, password, role } = req.body;
 
   try {
